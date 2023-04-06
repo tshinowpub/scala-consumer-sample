@@ -1,6 +1,6 @@
-package example
+package com.tshinow.scala.kinesis.consumer
 
-object Hello extends Greeting with App {
+object Main extends Greeting with App {
   println(greeting)
 }
 

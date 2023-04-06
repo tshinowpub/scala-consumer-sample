@@ -15,7 +15,10 @@ lazy val root = (project in file("."))
       munit % Test,
       logback.classic,
       slf4j.api,
-      slf4j.jclOverSlf4j
+      slf4j.jclOverSlf4j,
+      amazonaws.amazonKinesisClient,
+      amazonaws.awsJavaSdk,
+
     ),
     Compile / scalafmtOnCompile := true
   )
