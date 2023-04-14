@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  elasticmq:
+    container_name: elasticmq
+    image: softwaremill/elasticmq-native:1.3.14
+    ports:
+      - 9324:9324
+      - 9325:9325
+
