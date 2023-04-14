@@ -16,9 +16,10 @@ lazy val root = (project in file("."))
       logback.classic,
       slf4j.api,
       slf4j.jclOverSlf4j,
-      amazonaws.amazonKinesisClient,
-      amazonaws.awsJavaSdk,
-
+      awsv1.kinesis,
+      awsv2.sqs,
+      akka.stream,
+      zio.stream
     ),
     Compile / scalafmtOnCompile := true
   )
