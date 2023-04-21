@@ -1,4 +1,4 @@
-package com.tshinow.scala.kinesis.consumer
+package com.tshinow.scala.consumer
 
 class HelloSpec extends munit.FunSuite {
   test("say hello") {

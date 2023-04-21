@@ -19,7 +19,12 @@ lazy val root = (project in file("."))
       awsv1.kinesis,
       awsv2.sqs,
       akka.stream,
-      zio.stream
+      zio.zio,
+      zio.stream,
+      circe.core,
+      circe.parser,
+      circe.generic,
+      circe.genericExtras
     ),
     Compile / scalafmtOnCompile := true
   )

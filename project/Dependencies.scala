@@ -3,7 +3,7 @@ import sbt._
 object Version {
 
   val akkaStream = "2.6.20"
-  val zioStream  = "2.0.10"
+  val zio        = "2.0.10"
 
   val munit = "0.7.29"
 
@@ -14,6 +14,9 @@ object Version {
 
   val kinesis = "1.14.10"
   val awssdk  = "2.20.44"
+
+  val circe              = "0.14.5"
+  val circeGenericExtras = "0.14.3"
 
   val mysqlConnectorJava = "8.0.32"
 }
@@ -28,7 +31,9 @@ object Dependencies {
   }
 
   object zio {
-    val stream = "dev.zio" %% "zio-streams" % Version.zioStream
+
+    val zio    = "dev.zio" %% "zio"         % Version.zio
+    val stream = "dev.zio" %% "zio-streams" % Version.zio
   }
 
   object logback {
@@ -48,6 +53,14 @@ object Dependencies {
   }
   object awsv2 {
     val sqs = "software.amazon.awssdk" % "sqs" % Version.awssdk
+  }
+
+  object circe {
+
+    val core          = "io.circe" %% "circe-core"           % Version.circe
+    val parser        = "io.circe" %% "circe-parser"         % Version.circe
+    val generic       = "io.circe" %% "circe-generic"        % Version.circe
+    val genericExtras = "io.circe" %% "circe-generic-extras" % Version.circeGenericExtras
   }
 
   object MySQLConnectorJava {
