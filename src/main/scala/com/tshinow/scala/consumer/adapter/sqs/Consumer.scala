@@ -5,7 +5,7 @@ import zio._
 import zio.{ Task, ZIO }
 import zio.stream.ZStream
 
-object SqsConsumer {
+class Consumer() {
 
   def consume(): Unit = {
     val stream = ZStream
@@ -32,14 +32,4 @@ object SqsConsumer {
 
     ZIO.succeed(i)
   }
-
-  /*
-  private def receiveMessage(): Unit = {
-    val request = ReceiveMessageRequest
-      .builder()
-      .queueUrl("")
-      .waitTimeSeconds(10)
-      .maxNumberOfMessages(10)
-      .build()
-  }*/
 }

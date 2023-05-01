@@ -9,25 +9,23 @@ import java.net.URI
 object SqsAsyncClientFactory {
 
   def build(sqsSettings: SqsClientSettings): SqsAsyncClient = {
-    if (sqsSettings.isLocal)
+    if (sqsSettings.isLocal) {
       SqsAsyncClient
         .builder()
-        .credentialsProvider(
-          StaticCredentialsProvider.create(AwsBasicCredentials.create("TEST_KEY", "TEST_ACCESS_KEY"))
-        )
+        .endpointOverride(URI.create("http://localhost:9324"))
         .region(Region.AP_NORTHEAST_1)
         .build()
-    else
+    } else
       SqsAsyncClient
         .builder()
         .credentialsProvider(
-          StaticCredentialsProvider.create(AwsBasicCredentials.create("TEST_KEY", "TEST_ACCESS_KEY"))
+          StaticCredentialsProvider.create(AwsBasicCredentials.create("dummy", "dummy"))
         )
         .region(Region.AP_NORTHEAST_1)
         .build()
   }
 
-  final case class SqsClientSettings(hostName: String, port: Int = 6379, useLocal: Boolean = false) {
+  final case class SqsClientSettings(hostName: String, port: Int = 9324, useLocal: Boolean = false) {
 
     def endpointUrl(): URI = URI.create(s"http://$hostName:$port")
 
