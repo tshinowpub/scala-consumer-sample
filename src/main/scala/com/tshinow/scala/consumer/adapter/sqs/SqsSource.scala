@@ -1,33 +1,42 @@
 package com.tshinow.scala.consumer.adapter.sqs
 
-import software.amazon.awssdk.services.sqs.model.{ ReceiveMessageRequest, ReceiveMessageResponse, SqsException }
+import software.amazon.awssdk.services.sqs.model.{ Message, ReceiveMessageRequest }
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
+import zio.Console.printLine
+import zio.ZIO
+import zio.stream.ZStream
 
+import scala.concurrent.duration._
 import scala.compat.java8.FutureConverters.CompletionStageOps
-import scala.concurrent.Future
+import scala.concurrent.Await
+import scala.jdk.CollectionConverters._
 
 object SqsSource {
 
-  def apply(
-      queueUrl: String,
-      client: SqsAsyncClient,
-      settings: SqsSourceSettings
-  ): Future[ReceiveMessageResponse] = {
+  def apply(queueUrl: String, client: SqsAsyncClient, settings: SqsSourceSettings): ZStream[Any, Throwable, Message] = {
 
-    try {
-      val messages = client.receiveMessage(createReceiveMessageRequest(queueUrl, settings)).toScala
+    /** @see
+      *   https://zio.dev/reference/stream/zstream/creating-zio-streams
+      */
+    //val sqsStream: ZStream[Foo, Nothing, Foo] = ZStream.service[Foo]
 
-      println(messages)
+    /** @see
+      *   https://zio.dev/reference/stream/zstream/resourceful-streams/
+      */
+    val stream: ZStream[Any, Throwable, Message] =
+      ZStream
+        .acquireReleaseWith(
+          ZIO.attempt(client.receiveMessage(createReceiveMessageRequest(queueUrl, settings)).toScala) <* printLine(
+            "The file was opened."
+          )
+        )(future => ZIO.succeed(Await.result(future, 3.second)) <* printLine("Message not found.").orDie)
+        .flatMap { future =>
+          val response = Await.result(future, 3.second).messages().asScala.iterator
 
-      return messages
-    } catch {
-      case error: SqsException => println(error.toString)
-      case _: Throwable        => None
-    }
+          ZStream.fromIterator(response)
+        }
 
-    val aaa: Future[ReceiveMessageResponse] = Future.successful(null)
-
-    aaa
+    stream
   }
 
   private def createReceiveMessageRequest(queueUrl: String, settings: SqsSourceSettings): ReceiveMessageRequest = {
@@ -36,7 +45,7 @@ object SqsSource {
       .queueUrl(queueUrl)
       .waitTimeSeconds(settings.waitTimeSeconds)
       .attributeNamesWithStrings("all")
-      .maxNumberOfMessages(settings.waitTimeSeconds)
+      .maxNumberOfMessages(settings.maxNumberOfMessages)
       .build()
   }
 }

@@ -3,33 +3,29 @@ package com.tshinow.scala.consumer.application.worker.message
 import com.tshinow.scala.consumer.adapter.sqs.{ Consumer, SqsSource, SqsSourceSettings }
 import org.slf4j.LoggerFactory
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
-
-import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
-import scala.jdk.CollectionConverters._
+import zio.Unsafe
 
 class MessageCreatedWorker(sqsAsyncClient: SqsAsyncClient, sqsSourceSettings: SqsSourceSettings) {
 
   private val logger = LoggerFactory.getLogger(getClass)
 
   def run(): Unit = {
-    val sqsFuture = SqsSource(
-      "http://localhost:9324/000000000000/message-created",
-      sqsAsyncClient,
-      sqsSourceSettings
-    )
+    val zStream =
+      SqsSource("http://localhost:9324/000000000000/message-created", sqsAsyncClient, sqsSourceSettings)
 
-    Await.result(
-      sqsFuture.map(response => {
-        val messages = response.messages().asScala.toList
+    val stream = zStream
+      .map(message => {
+        println("Message が処理されてます！！！")
 
-        println(messages)
+        println(message)
+      })
+      .runDrain
 
-        println("メッセージ受信後です！！！")
-      }),
-      Duration.Inf
-    )
+    Unsafe.unsafe { implicit unsafe =>
+      zio.Runtime.default.unsafe
+        .run(stream)
+        .getOrThrowFiberFailure()
+    }
 
     logger.info("MessageCreatedWorker started.")
 

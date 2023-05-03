@@ -20,3 +20,9 @@ $ aws sqs list-queues --endpoint-url http://localhost:9324/
 ```shell
 $ aws sqs create-queue --queue-name message-created --attributes ReceiveMessageWaitTimeSeconds=20 --endpoint-url http://localhost:9324/
 ```
+
+- Send message
+
+```shell
+$ aws sqs send-message --endpoint-url http://localhost:9324/ --queue-url "http://localhost:9324/000000000000/message-created" --message-body "テストJsonメッセージだよ！！！"
+```
