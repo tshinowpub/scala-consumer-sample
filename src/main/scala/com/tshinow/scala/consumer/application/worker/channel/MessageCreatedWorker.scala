@@ -1,4 +1,4 @@
-package com.tshinow.scala.consumer.application.worker.message
+package com.tshinow.scala.consumer.application.worker.channel
 
 import com.tshinow.scala.consumer.adapter.sqs.{ Consumer, SqsSourceSettings }
 import org.slf4j.LoggerFactory

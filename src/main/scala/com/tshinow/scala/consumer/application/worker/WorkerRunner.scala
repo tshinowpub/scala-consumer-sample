@@ -1,7 +1,7 @@
 package com.tshinow.scala.consumer.application.worker
 
 import com.tshinow.scala.consumer.adapter.sqs.SqsSourceSettings
-import com.tshinow.scala.consumer.application.worker.message.MessageCreatedWorker
+import com.tshinow.scala.consumer.application.worker.channel.MessageCreatedWorker
 import org.slf4j.LoggerFactory
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
 
