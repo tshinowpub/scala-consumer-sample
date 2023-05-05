@@ -10,8 +10,6 @@ class WorkerRunner(sqsAsyncClient: SqsAsyncClient) {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   def run(): Unit = {
-    val _ = sqsAsyncClient
-
     println("WorkerRunnerが呼ばれました by println.")
 
     new MessageCreatedWorker(sqsAsyncClient, SqsSourceSettings(waitTimeSeconds = 1)).run()

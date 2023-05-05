@@ -16,24 +16,17 @@ object SqsSource {
   def apply(queueUrl: String, client: SqsAsyncClient, settings: SqsSourceSettings): ZStream[Any, Throwable, Message] = {
 
     /** @see
-      *   https://zio.dev/reference/stream/zstream/creating-zio-streams
-      */
-    //val sqsStream: ZStream[Foo, Nothing, Foo] = ZStream.service[Foo]
-
-    /** @see
       *   https://zio.dev/reference/stream/zstream/resourceful-streams/
       */
     val stream: ZStream[Any, Throwable, Message] =
       ZStream
         .acquireReleaseWith(
           ZIO.attempt(client.receiveMessage(createReceiveMessageRequest(queueUrl, settings)).toScala) <* printLine(
-            "The file was opened."
+            "SQS consume started."
           )
         )(future => ZIO.succeed(Await.result(future, 3.second)) <* printLine("Message not found.").orDie)
         .flatMap { future =>
-          val response = Await.result(future, 3.second).messages().asScala.iterator
-
-          ZStream.fromIterator(response)
+          ZStream.fromIterator(Await.result(future, 3.second).messages().asScala.iterator)
         }
 
     stream

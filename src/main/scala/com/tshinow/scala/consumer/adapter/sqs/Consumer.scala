@@ -1,20 +1,25 @@
 package com.tshinow.scala.consumer.adapter.sqs
 
 import org.slf4j.{ Logger, LoggerFactory }
+import software.amazon.awssdk.services.sqs.SqsAsyncClient
 import zio._
-import zio.{ Task, ZIO }
-import zio.stream.ZStream
 
-class Consumer() {
+class Consumer(sqsAsyncClient: SqsAsyncClient, settings: SqsSourceSettings) {
+
+  private val source =
+    SqsSource("http://localhost:9324/000000000000/message-created", sqsAsyncClient, settings)
+
+  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   def consume(): Unit = {
-    val stream = ZStream
-      .fromIterable(1 to 5)
-      .mapZIOParUnordered(5)(process)
+    val stream = source
+      .map(message => {
+        println("Message が処理されてます！！！")
+
+        println(message)
+      })
       .runDrain
       .onError(_ => Console.printLine("Stream application closed! We are doing some cleanup jobs.").orDie)
-
-    println(s"----------------------------------")
 
     Unsafe.unsafe { implicit unsafe =>
       zio.Runtime.default.unsafe
@@ -24,12 +29,7 @@ class Consumer() {
     }
 
     println("Run consume.")
-  }
 
-  private def process(i: Int): Task[Int] = {
-    val logger: Logger = LoggerFactory.getLogger(this.getClass)
-    logger.info(s"ID: $i の処理中です")
-
-    ZIO.succeed(i)
+    logger.info("Run consume by logger.")
   }
 }
