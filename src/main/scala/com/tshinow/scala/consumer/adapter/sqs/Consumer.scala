@@ -2,7 +2,8 @@ package com.tshinow.scala.consumer.adapter.sqs
 
 import com.tshinow.scala.consumer.domain.channel.{ AccountId, ChannelId, MessageId, MessageType }
 import com.tshinow.scala.consumer.message.MessageCreatedEvent
-import com.tshinow.scala.consumer.message.MessageCreatedEvent.MessagePosted
+import com.tshinow.scala.consumer.message.MessageCreatedEvent.{ MessagePosted, UnSupportedEvent, UserAdded }
+import com.tshinow.scala.consumer.usecases.MessagePostedUsecase
 import io.circe.{ Decoder, HCursor }
 import org.slf4j.{ Logger, LoggerFactory }
 import software.amazon.awssdk.services.sqs.SqsAsyncClient
@@ -20,18 +21,25 @@ class Consumer(sqsAsyncClient: SqsAsyncClient, settings: SqsSourceSettings)
 
   implicit private def messageCreatedEvent: Decoder[MessageCreatedEvent] = (c: HCursor) =>
     for {
-      messageId    <- c.downField("messageId").as[String]
-      channelId    <- c.downField("channelId").as[String]
-      accountId    <- c.downField("accountId").as[String]
-      message_type <- c.downField("type").as[String]
-      body         <- c.downField("body").as[String]
+      messageId       <- c.downField("messageId").as[String]
+      channelId       <- c.downField("channelId").as[String]
+      accountId       <- c.downField("accountId").as[String]
+      addedAccountIds <- c.downField("addedAccountIds").as[Option[Vector[String]]]
+      message_type    <- c.downField("messageType").as[String]
+      body            <- c.downField("body").as[String]
     } yield {
       MessageType.withName(message_type) match {
         case MessageType.UserPosted =>
           MessagePosted(MessageId(messageId), ChannelId(channelId), AccountId(accountId), body)
-        case MessageType.UserAdded =>
-          MessagePosted(MessageId(messageId), ChannelId(channelId), AccountId(accountId), body)
-        case _ => MessagePosted(MessageId(messageId), ChannelId(channelId), AccountId(accountId), body)
+        case MessageType.UserAdded if addedAccountIds.nonEmpty =>
+          UserAdded(
+            MessageId(messageId),
+            ChannelId(channelId),
+            AccountId(accountId),
+            addedAccountIds.get.map(AccountId),
+            body
+          )
+        case _ => UnSupportedEvent(body)
       }
     }
 
@@ -40,7 +48,11 @@ class Consumer(sqsAsyncClient: SqsAsyncClient, settings: SqsSourceSettings)
       .map(message => {
         println("Message が処理されてます！！！")
 
+        message.decodedMessage.map(handler)
+
         println(message)
+
+        message
       })
       .runDrain
       .onError(_ => Console.printLine("Stream application closed! We are doing some cleanup jobs.").orDie)
@@ -55,5 +67,21 @@ class Consumer(sqsAsyncClient: SqsAsyncClient, settings: SqsSourceSettings)
     println("Run consume.")
 
     logger.info("Run consume by logger.")
+  }
+
+  private val handler: MessageCreatedEvent => MessageCreatedEvent = {
+    case MessagePosted(messageId, channelId, accountId, body) => {
+      println("MessagePosted")
+
+      new MessagePostedUsecase().run(messageId, channelId, accountId)
+
+      MessagePosted(messageId, channelId, accountId, body)
+    }
+
+    case _ => {
+      println("それ以外が呼ばれました")
+
+      UnSupportedEvent("")
+    }
   }
 }
