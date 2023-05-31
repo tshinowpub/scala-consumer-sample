@@ -7,7 +7,8 @@ object Version {
 
   val munit = "0.7.29"
 
-  val scalaTest = "3.2.15"
+  val scalaTest = "3.2.16"
+  val scalaMock = "5.2.0"
 
   val logback = "1.4.6"
   val slf4j   = "2.0.5"
@@ -24,6 +25,7 @@ object Version {
 object Dependencies {
 
   val scalatest  = "org.scalatest" %% "scalatest" % Version.scalaTest
+  val scalaMock  = "org.scalamock" %% "scalamock" % Version.scalaMock
   lazy val munit = "org.scalameta" %% "munit"     % Version.munit
 
   object akka {

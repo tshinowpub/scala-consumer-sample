@@ -13,6 +13,8 @@ lazy val root = (project in file("."))
     name := "scala-kinesis-consumer-v1-sample",
     libraryDependencies ++= Seq(
       munit % Test,
+      scalatest,
+      scalaMock,
       logback.classic,
       slf4j.api,
       slf4j.jclOverSlf4j,
