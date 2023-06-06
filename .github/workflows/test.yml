@@ -19,5 +19,10 @@ jobs:
           distribution: 'corretto'
           java-version: '17'
 
+      - name: Print
+        run: |
+          pwd
+          ls -la
+
       - name: Run tests
         run: sbt test
