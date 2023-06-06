@@ -1,5 +1,5 @@
 import Dependencies._
-import Settings._
+import Settings.baseSettings
 import org.scalafmt.sbt.ScalafmtPlugin.autoImport._
 
 ThisBuild / scalaVersion     := "2.13.10"
