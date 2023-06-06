@@ -1,8 +1,8 @@
 package com.tshinow.scala.consumer.adapter.sqs
 
-import com.tshinow.scala.consumer.domain.channel.{ AccountId, ChannelId, MessageId, MessageType }
-import com.tshinow.scala.consumer.message.MessageCreatedEvent
-import com.tshinow.scala.consumer.message.MessageCreatedEvent.{ MessagePosted, UnSupportedEvent, UserAdded }
+import com.tshinow.scala.consumer.domain.channel.{ AccountId, ChannelId, MessageCreatedEvent, MessageId, MessageType }
+import MessageCreatedEvent.{ MessagePosted, UnSupportedEvent, UserAdded }
+import com.tshinow.scala.consumer.dbadapter.mysql.MysqlMessageRepository
 import com.tshinow.scala.consumer.usecases.MessagePostedUsecase
 import io.circe.{ Decoder, HCursor }
 import org.slf4j.{ Logger, LoggerFactory }
@@ -73,7 +73,7 @@ class Consumer(sqsAsyncClient: SqsAsyncClient, settings: SqsSourceSettings)
     case MessagePosted(messageId, channelId, accountId, body) => {
       println("MessagePosted")
 
-      new MessagePostedUsecase().run(messageId, channelId, accountId)
+      new MessagePostedUsecase(new MysqlMessageRepository).run(messageId, channelId, accountId, body)
 
       MessagePosted(messageId, channelId, accountId, body)
     }
