@@ -23,7 +23,6 @@ jobs:
         run: |
           pwd
           ls -la
-          scala --version
 
       - name: Run tests
         run: sbt test
